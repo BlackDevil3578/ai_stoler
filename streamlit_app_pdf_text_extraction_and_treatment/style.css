@@ -1,0 +1,103 @@
+.title {
+    color: greenyellow;
+    font-size: 24px;
+    font-weight: bold;
+}
+
+.stButton>button {
+    background-color: greenyellow !important;
+    color: black !important;
+    border: none !important;
+    padding: 10px !important;
+    border-radius: 5px !important;
+    margin: 10px 0 !important;
+    transition: background-color 0.3s ease, transform 0.3s ease;
+}
+
+.stButton>button:hover {
+    background-color: limegreen !important;
+    color: white !important;
+    transform: scale(1.05);
+    box-shadow: 0 0 10px limegreen !important;
+}
+
+.stButton>button:active {
+    background-color: darkgreen !important;
+    color: white !important;
+}
+
+.sidebar .element-container .stButton>button {
+    background-color: greenyellow !important;
+    color: black !important;
+    border: none !important;
+    padding: 10px !important;
+    border-radius: 5px !important;
+    margin: 10px 0 !important;
+    transition: background-color 0.3s ease, transform 0.3s ease;
+}
+
+.sidebar .element-container .stButton>button:hover {
+    background-color: limegreen !important;
+    color: white !important;
+    transform: scale(1.05);
+    box-shadow: 0 0 10px limegreen !important;
+}
+
+.sidebar .element-container .stButton>button:active {
+    background-color: darkgreen !important;
+    color: white !important;
+}
+
+/* Style for the uploaded file name */
+.ef3psqc12 {
+    color: greenyellow;
+    font-size: 16px;
+    margin-top: 10px;
+    border-color: greenyellow;
+}
+.ef3psqc12:hover {
+    color: limegreen;
+    border-color: limegreen;
+}
+
+.ef3psqc12:clicked {
+    color: limegreen;
+    border-color: limegreen;
+}
+
+.eqpbllx3 {
+    background-color: rgba(50, 205, 50, 0.2) !important;
+    color: white !important;
+}
+
+.st-emotion-cache-k7vsyb>e1nzilvr2{
+    color: greenyellow;
+}
+
+/* Styling for expanders */
+.css-17eq0hr {
+    border: 2px solid greenyellow !important;
+    border-radius: 10px !important;
+    margin: 10px 0 !important;
+    background-color: #444444 !important;
+}
+
+.css-17eq0hr > div[role="button"] {
+    background-color: greenyellow !important;
+    color: black !important;
+    padding: 10px !important;
+    border-radius: 10px 10px 0 0 !important;
+    font-weight: bold !important;
+}
+
+.css-17eq0hr > div[role="button"]:hover {
+    background-color: limegreen !important;
+    color: white !important;
+}
+
+.css-17eq0hr > div:not([role="button"]) {
+    padding: 10px !important;
+    background-color: #333333 !important;
+    color: greenyellow !important;
+    border-radius: 0 0 10px 10px !important;
+}
