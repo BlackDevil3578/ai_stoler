@@ -23,19 +23,6 @@ def download_nltk_resources():
     nltk.download('stopwords')
 
 # Functions for DataFrame manipulation
-def insert_row(df, page_value, content):
-    df['Page'] = df['Page'].astype(int)
-    df = df.sort_values(by='Page').reset_index(drop=True)
-    new_row = pd.DataFrame({'Page': [page_value], 'Content': [content]})
-    insert_index = df[df['Page'] >= page_value].index.min()
-    if pd.isna(insert_index):
-        insert_index = len(df)
-    df1 = df.iloc[:insert_index]
-    df2 = df.iloc[insert_index:]
-    df2.loc[:, 'Page'] = df2['Page'] + 1
-    df = pd.concat([df1, new_row, df2]).reset_index(drop=True)
-    df['Content'].fillna('', inplace=True)
-    return df
 
 def save_text_to_word(text_content, output_path):
     doc = Document()
@@ -43,20 +30,6 @@ def save_text_to_word(text_content, output_path):
     doc.save(output_path)
 
 
-def delete_row(df, page_value):
-    df['Page'] = df['Page'].astype(int)
-    df = df.sort_values(by='Page').reset_index(drop=True)
-    df = df[df['Page'] != page_value].reset_index(drop=True)
-    for index, row in df.iterrows():
-        if row['Page'] > page_value:
-            df.at[index, 'Page'] = row['Page'] - 1
-    return df
-
-def modify_row(df, page_value, new_content):
-    df['Page'] = df['Page'].astype(int)
-    df = df.sort_values(by='Page').reset_index(drop=True)
-    df.loc[df['Page'] == page_value, 'Content'] = new_content
-    return df
 
 def convert_excel_to_sql_file(df, table_name, output_path):
     sql_content = f"CREATE TABLE {table_name} (\n\tPage INT PRIMARY KEY,\n\tContent TEXT\n);\n\n"
@@ -222,6 +195,14 @@ def load_dataframe(temp_excel_path):
     else:
         st.session_state.df = pd.read_excel(temp_excel_path, index_col=None)
 
+def display_dataframes():
+    st.markdown("<h2 class='title'>Data from Excel file:</h2>", unsafe_allow_html=True)
+    # Display the dataframe without providing options for adding/modifying/deleting rows
+    df_display = st.empty()
+    df_display.dataframe(st.session_state.df, height=500)
+    return df_display
+
+
 def save_text_content(all_page_content):
     with open('TextFile.txt', 'w', encoding='utf-8') as f:
         f.write(all_page_content)
@@ -233,113 +214,35 @@ def toggle_columns():
     if 'show_right_col' not in st.session_state:
         st.session_state.show_right_col = True
 
+    toggle_left_button_text = "Toggle DataFrame"
+    toggle_right_button_text = "Toggle Text Content"
+
     col1, col2 = st.columns(2)
 
     with col1:
-        toggle_left_button_text = "Toggle data content"
         if st.button(toggle_left_button_text):
             st.session_state.show_left_col = not st.session_state.show_left_col
 
     with col2:
-        toggle_right_button_text = "Toggle text content"
         if st.button(toggle_right_button_text):
             st.session_state.show_right_col = not st.session_state.show_right_col
 
-    if st.session_state.show_left_col and st.session_state.show_right_col:
-        return st.columns([1, 1])  # Equal size columns
-    elif st.session_state.show_left_col:
-        return st.columns([1])  # Only the left column is visible
-    elif st.session_state.show_right_col:
-        return st.columns([1])  # Only the right column is visible
-    else:
-        return st.columns([1, 1])  # Both are hidden, so default to equal size columns
+    return st.session_state.show_left_col, st.session_state.show_right_col
+
 
 def display_dataframes():
     st.markdown("<h2 class='title'>Data from Excel file:</h2>", unsafe_allow_html=True)
     df_display = st.empty()
-    df_display.dataframe(st.session_state.df, 1000, 500)
+    df_display.dataframe(st.session_state.df, height=500)
     return df_display
+
 
 def save_df_to_excel(df, temp_excel_path):
     with pd.ExcelWriter(temp_excel_path, engine='xlsxwriter') as writer:
         df.to_excel(writer, index=False, sheet_name='First worksheet')
 
 
-def add_new_row(df_display, temp_excel_path):
-    with st.expander("Add New Row", expanded=True):
-        with st.form(key='add_row_form'):
-            page_number_input = st.number_input("Page Number", min_value=1, step=1)
-            content_input = st.text_area("Content")
-            submit_button = st.form_submit_button(label='Add Row')
 
-        if submit_button:
-            # Read the Excel file into a DataFrame
-            df = pd.read_excel(temp_excel_path)
-
-            # Create a new DataFrame with the new row
-            new_row = pd.DataFrame({'Page': [page_number_input], 'Content': [content_input]})
-
-            # Concatenate the new row to the existing DataFrame
-            df = pd.concat([df, new_row], ignore_index=True)
-
-            # Save the updated DataFrame back to the Excel file
-            save_df_to_excel(df, temp_excel_path)
-
-            # Reload the updated DataFrame and display it
-            st.session_state.df = pd.read_excel(temp_excel_path)
-            df_display.dataframe(st.session_state.df, 1000, 500)
-
-
-def delete_existing_row(df_display, temp_excel_path):
-    with st.expander("Delete Row", expanded=True):
-        with st.form(key='delete_row_form'):
-            delete_page_number_input = st.number_input("Page Number to Delete", min_value=1, step=1)
-            delete_button = st.form_submit_button(label='Delete Row')
-
-        if delete_button:
-            # Read the Excel file into a DataFrame
-            df = pd.read_excel(temp_excel_path)
-
-            # Delete the specified row from the DataFrame
-            df = df[df['Page'] != delete_page_number_input]
-
-            # Save the updated DataFrame back to the Excel file
-            save_df_to_excel(df, temp_excel_path)
-
-            # Reload the updated DataFrame and display it
-            st.session_state.df = pd.read_excel(temp_excel_path)
-            df_display.dataframe(st.session_state.df, 1000, 500)
-
-def modify_existing_row(df_display, temp_excel_path):
-    with st.expander("Modify Row", expanded=True):
-        with st.form(key='modify_row_form'):
-            modify_page_number_input = st.number_input("Page Number to Modify", min_value=1, step=1)
-            load_content_button = st.form_submit_button(label='Load Content')
-
-            if load_content_button:
-                # Load the current content for the selected page
-                df = pd.read_excel(temp_excel_path)
-                current_content = df.loc[df['Page'] == modify_page_number_input, 'Content'].values[0] if not df.loc[df['Page'] == modify_page_number_input, 'Content'].empty else ""
-                st.session_state.current_content = current_content
-            else:
-                st.session_state.current_content = ""
-
-            modify_content_input = st.text_area("Content", value=st.session_state.current_content)
-            modify_button = st.form_submit_button(label='Modify Row')
-
-        if modify_button:
-            # Read the Excel file into a DataFrame
-            df = pd.read_excel(temp_excel_path)
-
-            # Modify the specified row in the DataFrame
-            df.loc[df['Page'] == modify_page_number_input, 'Content'] = modify_content_input
-
-            # Save the updated DataFrame back to the Excel file
-            save_df_to_excel(df, temp_excel_path)
-
-            # Reload the updated DataFrame and display it
-            st.session_state.df = pd.read_excel(temp_excel_path)
-            df_display.dataframe(st.session_state.df, 1000, 500)
 
 def extract_text_from_pdf_plumber(file_path):
     with pdfplumber.open(file_path) as pdf:
@@ -498,25 +401,21 @@ def main():
         load_dataframe(temp_excel_path)
         save_text_content(all_page_content)
 
-        cols = toggle_columns()
+        show_left_col, show_right_col = toggle_columns()
 
-        if st.session_state.show_left_col:
-            with cols[0]:
-                df_display = display_dataframes()
-                add_new_row(df_display, temp_excel_path)
-                delete_existing_row(df_display, temp_excel_path)
-                modify_existing_row(df_display, temp_excel_path)
+        # Show the DataFrame in the left column if toggled
+        if show_left_col or show_right_col:
+            col1, col2 = st.columns(2)
+            if show_left_col:
+                with col1:
+                    display_dataframes()
 
-        if st.session_state.show_right_col:
-            if len(cols) > 1:
-                with cols[1]:
-                    display_text_content()
-            else:
-                with cols[0]:
+            if show_right_col:
+                with col2:
                     display_text_content()
 
-        add_download_buttons(temp_excel_path,pdf_filename)
-        convert_and_download_sql(table_name,pdf_filename)
+        add_download_buttons(temp_excel_path, pdf_filename)
+        convert_and_download_sql(table_name, pdf_filename)
 
 if __name__ == "__main__":
     main()
